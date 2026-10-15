@@ -1283,10 +1283,12 @@ function objEquiv(
         if (!hasOwn(b, i)) {
           return sparseArrayEquiv(a, b, mode, memos, i);
         }
-        if (mode !== kLoose && (a[i] !== undefined || !hasOwn(a, i))) {
-          return false;
-        } else if (
-          mode === kLoose && !innerDeepEqual(a[i], b[i], mode, memos)
+        // A hole in `a` never matches an own `undefined` in `b`, even in loose
+        // mode (the reverse case is handled by sparseArrayEquiv). In loose mode
+        // `null` is still allowed to match `undefined`.
+        if (
+          (a[i] !== undefined || !hasOwn(a, i)) &&
+          (mode !== kLoose || a[i] !== null)
         ) {
           return false;
         }

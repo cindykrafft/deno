@@ -142,3 +142,19 @@ Deno.test("[node/assert] doesNotReject with 3 parameters", async () => {
     "custom message",
   );
 });
+
+Deno.test("[node/assert] deepEqual() treats array holes and undefined symmetrically", () => {
+  // Node.js: a hole never loosely equals an own `undefined` element, in either
+  // argument order.
+  assert.throws(() => assert.deepEqual([1, , 3], [1, undefined, 3]));
+  assert.throws(() => assert.deepEqual([1, undefined, 3], [1, , 3]));
+  assert.throws(() => assert.deepEqual([,], [undefined]));
+  assert.throws(() =>
+    assert.deepEqual({ a: [1, , 2] }, { a: [1, undefined, 2] })
+  );
+  assert.notDeepEqual([1, , 3], [1, undefined, 3]);
+  // Loose mode still lets null match undefined.
+  assert.deepEqual([null], [undefined]);
+  assert.deepEqual([undefined], [null]);
+  assert.deepEqual([1, , 3], [1, , 3]);
+});
